@@ -2,14 +2,27 @@ import React from 'react';
 import { Link } from "react-router-dom";
 import "./Home.css";
 import { Logo } from "../images/Netflix";
-import { ConnectButton, Icon, TabList, Tab, Button, Modal } from "web3uikit";
+import { ConnectButton, Icon, TabList, Tab, Button, Modal, useNotification } from "web3uikit";
 import { movies } from "../helpers/library";
 import { useState } from "react";
+import { useMoralis } from "react-moralis";
 
 const Home = () => {
 
   const [visible, setVisible] = useState(false);
   const [selectedFilm, setSelectedFilm] = useState();
+  const {isAuthenticated} = useMoralis();
+
+  const dispatch = useNotification();
+
+  const handleNewNotification = () => {
+    dispatch({
+      type:"error",
+      message:"Please connect your crypto wallet",
+      title:"Not Authenticated",
+      position:"topL"
+    })
+  }
 
 return(
   <>
@@ -29,7 +42,7 @@ return(
            <p className="sceneDesc">{movies[0].Description}</p>
            <div className="playButton">
              <Button icon="chevronRightX2" text="Play" theme="secondary" type="button" />
-             <Button icon="plus" text="Add to My List" theme="translucent" type="button" />
+             <Button icon="plus" text="Add to My List" theme="translucent" type="button" onClick={()=>console.log(isAuthenticated)}/>
            </div>
          </div>
         <div className="title">
@@ -60,10 +73,19 @@ return(
               <img src={selectedFilm.Scene} className="modalImg" alt="movieScene"></img>
               <img src={selectedFilm.Logo} className="modalLogo" alt="movieLogo"></img>
               <div className="modalPlayButton">
-                <Link to="/player" state={selectedFilm.Movie}>
+                {isAuthenticated ? (
+                  <>
+                  <Link to="/player" state={selectedFilm.Movie}>
                   <Button icon="chevronRightX2" text="Play" theme="secondary" type="button" />
-                </Link>
-                <Button icon="plus" text="Add to My List" theme="translucent" type="button" />
+                  </Link>
+                  <Button icon="plus" text="Add to My List" theme="translucent" type="button" />
+                  </>
+                ) : (
+                  <>
+                  <Button icon="chevronRightX2" text="Play" theme="secondary" type="button" onClick={handleNewNotification} />
+                  <Button icon="plus" text="Add to My List" theme="translucent" type="button" onClick={handleNewNotification} />
+                  </>
+                )}
               </div>
               <div className="movieInfo">
                 <div className="description">
